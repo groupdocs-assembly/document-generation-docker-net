@@ -1,9 +1,13 @@
-﻿# Generating documents in a container
+﻿# Document generation in Docker with .NET
 
 [![build](https://github.com/groupdocs-assembly/document-generation-docker-net/actions/workflows/build.yml/badge.svg)](https://github.com/groupdocs-assembly/document-generation-docker-net/actions/workflows/build.yml)
 [![NuGet](https://img.shields.io/nuget/v/GroupDocs.Assembly?label=GroupDocs.Assembly)](https://www.nuget.org/packages/GroupDocs.Assembly/)
 [![.NET](https://img.shields.io/badge/.NET-8.0%20%7C%2010.0-512bd4)](https://dotnet.microsoft.com/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
+**If a document generated in a container looks wrong, it is almost always the fonts: the .NET
+runtime images ship with none.** Install `fontconfig` and `fonts-liberation`, then render a page
+with `DocumentAssembler.GeneratePreview` to prove they are there.
 
 Document generation moves to Linux the moment it goes into a container, a Kubernetes job or a
 function. The code does not change. The image does — and the single thing that catches everybody is
@@ -113,6 +117,27 @@ Every call mirrors an example of the product's examples repository
   marks ([temporary licence](https://purchase.groupdocs.com/temporary-license)).
 * **Frameworks.** The sample targets .NET 8; the package also builds for .NET Framework 4.0 Client
   Profile, 4.6.2 and 4.8, .NET Standard 2.0, .NET 6 and .NET 10.
+
+## Common questions
+
+**Why does my generated document look different in Docker?**
+No fonts in the image. Text is laid out with a substitute, so line breaks, column widths and page
+counts move — and nothing throws.
+
+**Which packages do I need?**
+`fontconfig` to make fonts discoverable at all, plus `fonts-liberation`, which is
+metric-compatible with Arial, Times New Roman and Courier New.
+
+**How do I add a corporate font?**
+Copy it into `/usr/share/fonts` and run `fc-cache -f`.
+
+**How do I catch a missing font in CI?**
+Render a page during the image build and compare it with a reference PNG. A DOCX hides the problem
+because layout is decided by whatever opens it.
+
+**Does this work in Azure Functions or AWS Lambda?**
+Yes, on the same base image. Assemble to streams, apply the licence once per process, and keep an
+instance warm if the first request is user-facing.
 
 ## Related samples
 
